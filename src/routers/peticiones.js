@@ -1,6 +1,7 @@
 const express = require('express')
 const peticionesModel = require('../models/peticiones')
 const shoesModel = require('../models/zapatos')
+const marcaModel = require('../models/marca')
 const router = express.Router()
 
 //crear 
@@ -21,10 +22,19 @@ router.get('/aceptar/:id', (req, res)=>{
     const {id} = req.params;
     peticionesModel.findById(id).
     then((data)=>{
-            shoesModel.insertMany([data])
-    }).then(()=>{
-        peticionesModel.deleteOne({_id: id})
-        .then((info)=>res.send(info))
+        shoesModel.insertMany([data])
+        .then((add)=>{
+            peticionesModel.deleteOne({_id: id})
+            .then(()=>{
+                marcaModel.findOne({nombre: data.Marca})
+                .then((resp)=>{
+                    const { productos } = resp
+                    productos.push(add[0]._id)
+                    marcaModel.updateOne({_id: resp._id}, {$set: {productos: productos}})
+                    .then((resp)=>res.json(resp))
+                })
+            })
+        })
     })
 
 })

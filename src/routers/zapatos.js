@@ -36,7 +36,7 @@ router.get('/ver/:id', (req, res)=>{
 router.put('/actualizar/:id', (req, res)=>{
     const {id} = req.params;
     const {nombre, Marca, foto, puntuacion, ventas, precio, Cantidad, Categoria} = req.body
-    zapatosModel.updateOne({ _id: id },{ $set:{nombre, Marca, puntuacion, ventas, precio, Cantidad, Categoria}})
+    zapatosModel.updateOne({ _id: id },{ $set:{nombre, foto, Marca, puntuacion, ventas, precio, Cantidad, Categoria}})
     .then((data)=> res.json(data))
     .catch((err)=> res.json({message: err}))
 })
@@ -48,26 +48,29 @@ router.delete('/borrar/:id', (req, res)=>{
     .catch((err)=> res.json({message: err}))
 })
 router.get('/datos', (req, res) => {
-    const mejoresPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ puntacion: -1 }).limit(10);
+    const mejoresPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ ventas: -1 }).limit(10);
     const ultimosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ _id: -1 }).limit(10);
     const unidadesPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ Cantidad: 1 }).limit(10);
+    const preciosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ precio: -1 }).limit(10);
     
-    Promise.all([mejoresPromise, ultimosPromise, unidadesPromise])
-      .then(([mejores, ultimos, unidades]) => {
+    Promise.all([mejoresPromise, ultimosPromise, unidadesPromise, preciosPromise])
+      .then(([mejores, ultimos, unidades, precios]) => {
         const resultado = {
           mejores,
           ultimos,
-          unidades
+          unidades,
+          precios
         };
         res.send(resultado);
       })
   });
 //nombres y categorias
 router.get('/nombres', (req, res)=>{
-    zapatosModel.find()
+    zapatosModel.find().sort({precio: 1})
     .then((data)=>{
         var nombres = data.map(({nombre}) => nombre);
-        var cat = data.map(({Categoria})=> Categoria)
+        var min = data[0].precio
+        var cat = data.map(({Categoria})=> Categoria);
         cat = cat.flat()
         var final = []
         cat.forEach(e=>{
@@ -77,27 +80,41 @@ router.get('/nombres', (req, res)=>{
                 final.push(e)
             }
         })
-        res.send({
-            "Nombres": nombres,
-            "categorias": final
-        })
+        zapatosModel.find().sort({precio: -1})
+        .then((resp)=>{
+            var max = resp[0].precio
+            marcaModel.find()
+            .then((marca)=>{
+                var marcas = marca.map(({nombre})=>nombre)
+                res.send({
+                    "Nombres": nombres,
+                    "categorias": final,
+                    "preciomin": min,
+                    "preciomax": max,
+                    marcas
+                })
+            })
+        }) 
+        
     })
 })
 //filtros
 router.post('/filtros', (req, res)=>{
-    const {Marca, Categoria, precio, puntuacion} = req.body
+    const {Marca, Categoria, precio, nombre} = req.body
     var filtro = {}
-    if(Marca!=null){
-        filtro.Marca = Marca 
+    if(nombre==null){
+        if(Marca!=null){
+            filtro.Marca = Marca 
+        }
+        if(Categoria!=null){
+            filtro.Categoria = { $in: Categoria}
+        }
+        if(precio!=null){
+            filtro.precio = { $lte: precio}
+        }
     }
-    if(Categoria!=null){
-        filtro.Categoria = { $in: Categoria}
-    }
-    if(precio!=null){
-        filtro.precio = { $lte: precio}
-    }
-    if(puntuacion!=null){
-        filtro.puntacion = { $gte: puntuacion}
+    else{
+        filtro.nombre = nombre
     }
     zapatosModel.find(filtro)
     .then((data)=>res.send(data))

@@ -75,7 +75,11 @@ router.get('/nombres', (req, res)=>{
     marcaModel.find()
     .then((data)=>{
         var nombres = data.map((e) => e.nombre);
-        res.send(nombres)
+        var banner = data.map((e) => e.banner);
+        res.send({
+            nombres,
+            banner
+        })
     })
 })
 module.exports = router
