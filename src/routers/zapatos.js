@@ -21,7 +21,7 @@ router.post('/crear', (req, res)=>{
 })
 //traer
 router.get('/ver', (req, res)=>{
-    zapatosModel.find({ Cantidad: { $ne: 0 } })
+    zapatosModel.find()
     .then((data)=> res.json(data))
     .catch((err)=> res.json({message: err}))
 })
@@ -43,8 +43,18 @@ router.put('/actualizar/:id', (req, res)=>{
 //borrar
 router.delete('/borrar/:id', (req, res)=>{
     const {id} = req.params;
-    zapatosModel.deleteOne({_id: id})
-    .then((data)=> res.json(data))
+    zapatosModel.findById(id)
+    .then((e)=>{
+        marcaModel.findOne({nombre: e.Marca})
+        .then((mr)=>{
+            var newp = mr.productos.filter(e=>e!=id)
+            marcaModel.updateOne({_id: mr._id}, {$set:{productos: newp}})
+            .then(()=>{
+                zapatosModel.deleteOne({_id: id})
+                .then((data)=> res.json(data))
+            }) 
+        })
+    })
     .catch((err)=> res.json({message: err}))
 })
 router.get('/datos', (req, res) => {
@@ -103,13 +113,13 @@ router.post('/filtros', (req, res)=>{
     const {Marca, Categoria, precio, nombre} = req.body
     var filtro = {}
     if(nombre==null){
-        if(Marca!=null){
+        if(Marca!=null && Marca!=undefined){
             filtro.Marca = Marca 
         }
-        if(Categoria!=null){
+        if(Categoria!=null && Categoria!=undefined){
             filtro.Categoria = { $in: Categoria}
         }
-        if(precio!=null){
+        if(!precio!=null && precio!=undefined){
             filtro.precio = { $lte: precio}
         }
     }

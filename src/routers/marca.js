@@ -61,7 +61,7 @@ router.get('/traer/:nombre', async (req, res) => {
         const zap = await zapatosModel.findById(e);
         detalles.push(zap);
       }
-  
+      detalles.sort((a, b) => b.ventas - a.ventas);
       res.send({
         datos: data,
         details: detalles

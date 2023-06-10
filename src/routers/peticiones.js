@@ -39,7 +39,7 @@ router.get('/aceptar/:id', (req, res)=>{
 
 })
 //negar peticion
-router.delete('/borrar/:id', (req, res)=>{
+router.delete('/rechazar/:id', (req, res)=>{
     const {id} = req.params;
     peticionesModel.deleteOne({_id: id})
     .then((data)=> res.json(data))

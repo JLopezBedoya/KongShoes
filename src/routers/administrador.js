@@ -21,7 +21,7 @@ router.post('/login', (req, res)=>{
         if (usuario == usercomp && password == passcomp){
             res.send({
                 id: "647e1e70c80fbdc2dc7a2074",
-                nombre: "administrador",
+                nombre: "KongShoes",
                 passby: true
             })
         }else{
@@ -67,7 +67,7 @@ router.get('/panel', (req, res)=>{
                         let co = com.map(e=>e.length)
                         var buys = co.reduce((a, b)=> a+b, 0)
                         var buyprom = buys/co.length
-                        res.send({
+                        res.json({
                             "totalProductos": cantpro,
                             "totalVentas": zapatosvent,
                             "totalUsuario": usuarios,
