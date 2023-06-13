@@ -58,10 +58,10 @@ router.delete('/borrar/:id', (req, res)=>{
     .catch((err)=> res.json({message: err}))
 })
 router.get('/datos', (req, res) => {
-    const mejoresPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ ventas: -1 }).limit(10);
-    const ultimosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ _id: -1 }).limit(10);
-    const unidadesPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ Cantidad: 1 }).limit(10);
-    const preciosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ precio: -1 }).limit(10);
+    const mejoresPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ ventas: -1 }).limit(12);
+    const ultimosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ _id: -1 }).limit(12);
+    const unidadesPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ Cantidad: 1 }).limit(12);
+    const preciosPromise = zapatosModel.find({ Cantidad: { $ne: 0 } }).sort({ precio: -1 }).limit(12);
     
     Promise.all([mejoresPromise, ultimosPromise, unidadesPromise, preciosPromise])
       .then(([mejores, ultimos, unidades, precios]) => {
@@ -74,6 +74,7 @@ router.get('/datos', (req, res) => {
         res.send(resultado);
       })
   });
+
 //nombres y categorias
 router.get('/nombres', (req, res)=>{
     zapatosModel.find().sort({precio: 1})

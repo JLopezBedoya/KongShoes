@@ -44,7 +44,7 @@ router.post('/login', (req, res)=>{
                     "id": "0",
                     "nombre": "usuario",
                     "passby": false,
-                    "razon": "password incorrecta"
+                    "razon": "Contraseña incorrecta"
                   })
             }
         }

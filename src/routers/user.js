@@ -27,7 +27,7 @@ router.post('/login', (req, res)=>{
     userModel.findOne({nombre: usercomp})
     .then((data)=>{
         if(data==null){
-            res.send({
+            res.json({
                 "id": "0",
                 "nombre": "usuario",
                 "passby": false,
@@ -36,21 +36,21 @@ router.post('/login', (req, res)=>{
         }
         else{
             if(passcomp==data.password){
-                res.send({
+                res.json({
                     "id": data._id,
                     "nombre": data.nombre,
                     "passby": true
                 })
             }else{
-                res.send({
+                res.json({
                     "id": "0",
                     "nombre": "usuario",
                     "passby": false,
-                    "razon": "password incorrecta"
+                    "razon": "Contraseña incorrecta"
                   })
             }
         }
-    })
+    }).catch((err)=>res.json({message: err}))
 })
 //traer los nombres
 router.get('/nombres', (req, res)=>{
@@ -109,9 +109,11 @@ router.post('/comprar', (req, res)=>{
 //visualizar compras
 router.get('/comprados/:id', (req, res)=>{
     const { id } = req.params
+    if(id!="0"){
     userModel.findById(id)
     .then((data)=>{
         res.send(data.compras)
     })
+    }
 })
 module.exports = router
